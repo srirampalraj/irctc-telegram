@@ -22,7 +22,7 @@ app.listen(PORT, () => {
 
   // 6. Set the webhook (update this with your public URL)
   bot.api
-    .setWebhook(`https://your-domain.com/webhook`)
+    .setWebhook(`https://irctc-telegram.onrender.com/`)
     .then(() => {
       console.log("Webhook set successfully");
     })
@@ -97,4 +97,14 @@ const reduceDaysAndSetTime = (date: Date, first: boolean): number => {
 };
 
 //Start the Bot
-bot.start();
+bot.api
+  .deleteWebhook()
+  .then(() => {
+    console.log("Webhook deleted, switching to getUpdates (polling).");
+
+    // 3. Start the bot in polling mode
+    bot.start();
+  })
+  .catch((err) => {
+    console.error("Error deleting webhook:", err);
+  });
