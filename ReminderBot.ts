@@ -108,3 +108,11 @@ bot.api
   .catch((err) => {
     console.error("Error deleting webhook:", err);
   });
+
+bot.catch((err) => {
+  if (err.message.includes("query is too old")) {
+    console.error("Callback query is too old to respond to:", err);
+  } else {
+    console.error("An error occurred:", err);
+  }
+});
