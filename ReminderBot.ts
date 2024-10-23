@@ -1,0 +1,77 @@
+import { Bot } from "grammy";
+import moment from "moment";
+import { Calendar } from "./calendar";
+import * as moment_ from "moment-timezone";
+
+const moment_timezone = moment_.default;
+
+//Create a new bot
+const bot = new Bot("8170062103:AAE3qbXt4JBriGb-7YOm6URETVP5CjSc9xw");
+
+const calendar = new Calendar();
+
+bot.command("start", async (ctx) => {
+  await ctx.reply(
+    `Hi ${ctx.from?.first_name} 👋!
+Start with /remind to send a date!`
+  );
+});
+
+bot.command("remind", async (ctx) => {
+  const calendarMarkup = calendar.generateInlineKeyboard();
+  await ctx.reply("Please select a date:", {
+    reply_markup: calendarMarkup,
+  });
+});
+
+bot.on("callback_query:data", async (ctx) => {
+  const data = ctx.callbackQuery.data;
+
+  if (data === "prev_month") {
+    calendar.changeMonth("prev");
+  } else if (data === "next_month") {
+    calendar.changeMonth("next");
+  } else if (data && data.startsWith("date_")) {
+    const day = parseInt(data.split("_")[1]);
+    calendar.selectDate(day);
+    await ctx.answerCallbackQuery(); // Acknowledge the callback
+    await ctx.reply(`You selected: ${calendar.getSelectedDate()}`);
+    const dates = getEventDate(calendar.getSelectedDate() as Date);
+    await ctx.reply(
+      `Click [here](https://calendar.google.com/calendar/render?action=TEMPLATE&dates=${
+        dates[0]
+      }%2F${
+        dates[1]
+      }&details=Booking%20starts%20at%208%3A00%20AM&location=&text=IRCTC%20Ticket%20Reminder%20for%20${moment(
+        calendar.getSelectedDate()
+      ).format("DD MMM YYYY")}) to add this to Google Calendar`,
+      { parse_mode: "MarkdownV2" }
+    );
+    return;
+  }
+
+  const updatedMarkup = calendar.generateInlineKeyboard();
+  await ctx.editMessageReplyMarkup({ reply_markup: updatedMarkup });
+  await ctx.answerCallbackQuery(); // Acknowledge the callback
+});
+
+const getEventDate = (date: Date): [string, string] => {
+  return [
+    moment(new Date(reduceDaysAndSetTime(date, true) * 1000)).format(
+      "YYYYMMDDTHHmmss"
+    ) + "Z",
+    moment(new Date(reduceDaysAndSetTime(date, false) * 1000)).format(
+      "YYYYMMDDTHHmmss"
+    ) + "Z",
+  ];
+};
+
+const reduceDaysAndSetTime = (date: Date, first: boolean): number => {
+  const reducedDate = new Date(date);
+  reducedDate.setDate(reducedDate.getDate() - 60);
+  first ? reducedDate.setHours(2, 15, 0, 0) : reducedDate.setHours(4, 15, 0, 0);
+  return Math.floor(reducedDate.getTime() / 1000);
+};
+
+//Start the Bot
+bot.start();
