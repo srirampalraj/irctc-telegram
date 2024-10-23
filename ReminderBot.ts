@@ -1,12 +1,35 @@
-import { Bot } from "grammy";
+import { Bot, webhookCallback } from "grammy";
 import moment from "moment";
 import { Calendar } from "./calendar";
 import * as moment_ from "moment-timezone";
+import express from "express";
+import * as dotenv from "dotenv";
 
 const moment_timezone = moment_.default;
+const app = express();
+dotenv.config();
 
 //Create a new bot
-const bot = new Bot("8170062103:AAE3qbXt4JBriGb-7YOm6URETVP5CjSc9xw");
+const bot = new Bot(process.env.BOT_TOKEN as string);
+
+app.use(express.json()); // For parsing application/json
+app.use("/webhook", webhookCallback(bot, "express")); // Grammy's webhook middleware
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+
+  // 6. Set the webhook (update this with your public URL)
+  bot.api
+    .setWebhook(`https://your-domain.com/webhook`)
+    .then(() => {
+      console.log("Webhook set successfully");
+    })
+    .catch((err) => {
+      console.error("Error setting webhook:", err);
+    });
+});
 
 const calendar = new Calendar();
 
