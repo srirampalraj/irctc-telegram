@@ -50,6 +50,12 @@ bot.command("remind", async (ctx) => {
 bot.on("callback_query:data", async (ctx) => {
   const data = ctx.callbackQuery.data;
 
+  // Ignore placeholder buttons
+  if (data === "ignore") {
+    await ctx.answerCallbackQuery(); // Acknowledge the callback without any action
+    return;
+  }
+
   if (data === "prev_month") {
     calendar.changeMonth("prev");
   } else if (data === "next_month") {
@@ -57,16 +63,30 @@ bot.on("callback_query:data", async (ctx) => {
   } else if (data && data.startsWith("date_")) {
     const day = parseInt(data.split("_")[1]);
     calendar.selectDate(day);
+    const selectedDate = calendar.getSelectedDate() as Date;
+
+    // Check if the selected date is less than 60 days away
+    const today = new Date();
+    const diffInDays = Math.floor(
+      (selectedDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffInDays <= 60) {
+      await ctx.answerCallbackQuery(); // Acknowledge the callback
+      await ctx.reply("⚠️ Booking already started!");
+      return;
+    }
+
     await ctx.answerCallbackQuery(); // Acknowledge the callback
-    await ctx.reply(`You selected: ${calendar.getSelectedDate()}`);
-    const dates = getEventDate(calendar.getSelectedDate() as Date);
+    await ctx.reply(`You selected: ${selectedDate}`);
+    const dates = getEventDate(selectedDate);
     await ctx.reply(
       `Click [here](https://calendar.google.com/calendar/render?action=TEMPLATE&dates=${
         dates[0]
       }%2F${
         dates[1]
       }&details=Booking%20starts%20at%208%3A00%20AM&location=&text=IRCTC%20Ticket%20Reminder%20for%20${moment(
-        calendar.getSelectedDate()
+        selectedDate
       ).format("DD MMM YYYY")}) to add this to Google Calendar`,
       { parse_mode: "MarkdownV2" }
     );

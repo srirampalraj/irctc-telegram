@@ -51,14 +51,30 @@ export class Calendar {
     );
     const keyboard = new InlineKeyboard();
 
+    const today = new Date();
+    const isCurrentMonth =
+      this.currentYear === today.getFullYear() &&
+      this.currentMonth === today.getMonth();
+    const isBeyondOneYear =
+      (this.currentYear - today.getFullYear()) * 12 +
+        (this.currentMonth - today.getMonth()) >
+      12;
+
     // Add month/year row with prev/next buttons
+    if (isCurrentMonth) {
+      keyboard.text(" ", "ignore"); // Placeholder for disabled "prev_month"
+    } else {
+      keyboard.text("<<", "prev_month");
+    }
     keyboard
-      .text("<<", "prev_month")
       .text(
         `${this.monthNames[this.currentMonth]} ${this.currentYear}`,
         "ignore"
       )
-      .text(">>", "next_month")
+      .text(
+        isBeyondOneYear ? " " : ">>",
+        isBeyondOneYear ? "ignore" : "next_month"
+      )
       .row();
 
     // Add the day names row (Mon, Tue, Wed, etc.)
@@ -75,7 +91,11 @@ export class Calendar {
 
     // Add day buttons for the current month
     for (let day = 1; day <= daysInMonth; day++) {
-      keyboard.text(day.toString(), `date_${day}`);
+      if (isCurrentMonth && day < today.getDate()) {
+        keyboard.text(" ", "ignore"); // Placeholder for past days
+      } else {
+        keyboard.text(day.toString(), `date_${day}`);
+      }
       dayIndex++;
       if (dayIndex % 7 === 0) {
         keyboard.row();
