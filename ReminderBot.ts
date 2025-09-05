@@ -136,3 +136,5 @@ bot.catch((err) => {
     console.error("An error occurred:", err);
   }
 });
+
+export default app;
