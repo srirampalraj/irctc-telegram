@@ -22,7 +22,7 @@ app.listen(PORT, () => {
 
   // 6. Set the webhook (update this with your public URL)
   bot.api
-    .setWebhook(`https://irctc-telegram.onrender.com/`)
+    .setWebhook(`https://${process.env.VERCEL_URL}/webhook`)
     .then(() => {
       console.log("Webhook set successfully");
     })
