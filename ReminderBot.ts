@@ -7,6 +7,10 @@ import * as dotenv from "dotenv";
 
 const moment_timezone = moment_.default;
 const app = express();
+console.log(
+  "Current Time in Asia/Kolkata:",
+  moment_timezone().tz("Asia/Kolkata").format()
+);
 dotenv.config();
 
 //Create a new bot
