@@ -17,7 +17,7 @@ dotenv.config();
 const bot = new Bot(process.env.BOT_TOKEN as string);
 
 app.use(express.json()); // For parsing application/json
-app.use("/webhook", webhookCallback(bot, "express")); // Grammy's webhook middleware
+app.use("/", webhookCallback(bot, "express")); // Grammy's webhook middleware
 
 const PORT = process.env.PORT || 3000;
 
@@ -26,7 +26,7 @@ app.listen(PORT, () => {
 
   // 6. Set the webhook (update this with your public URL)
   bot.api
-    .setWebhook(`https://${process.env.VERCEL_URL}/webhook`)
+    .setWebhook(`https://${process.env.VERCEL_URL}/`)
     .then(() => {
       console.log("Webhook set successfully");
     })
