@@ -2,10 +2,10 @@
   "name": "irctc-telegram",
   "version": "1.0.0",
   "description": "IRCTC Ticket Reminder",
-  "main": "ReminderBot.ts",
+  "main": "app.ts",
   "scripts": {
-    "start": "ts-node ./ReminderBot.ts",
-    "dev": "ts-node-dev ./ReminderBot.ts",
+    "start": "ts-node ./app.ts",
+    "dev": "ts-node-dev ./app.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
